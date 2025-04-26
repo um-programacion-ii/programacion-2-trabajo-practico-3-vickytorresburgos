@@ -1,9 +1,13 @@
 package org.example.models;
+
 import lombok.*;
 
+@Builder
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
+
 public class Libro {
     private String ISBN;
     private String titulo;
