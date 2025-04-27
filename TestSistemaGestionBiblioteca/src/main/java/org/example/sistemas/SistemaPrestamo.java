@@ -1,6 +1,7 @@
 package org.example.sistemas;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.example.exceptions.LibroNoDisponibleException;
 import org.example.exceptions.LibroNoEncontradoException;
 
@@ -13,14 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
+@NoArgsConstructor
+
 public class SistemaPrestamo {
     private Catalogo catalogo;
-    private List<Prestamo> prestamos;
-
-    public SistemaPrestamo(Catalogo catalogo) {
-        this.catalogo = catalogo;
-        this.prestamos = new ArrayList<>();
-    }
+    private List<Prestamo> prestamos= new ArrayList<>();
 
     public Prestamo registrarPrestamo(String ISBN) {
         Libro libro = catalogo.buscarLibroPorISBN(ISBN);
