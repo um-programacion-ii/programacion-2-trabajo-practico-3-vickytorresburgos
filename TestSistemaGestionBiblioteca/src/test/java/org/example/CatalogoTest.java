@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.Collection;
 
-public class TestCatalogo {
+public class CatalogoTest {
     @Test
     void agregarLibro() {
         Catalogo catalogo = new Catalogo();
