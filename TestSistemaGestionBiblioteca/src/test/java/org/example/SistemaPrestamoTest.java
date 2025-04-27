@@ -15,10 +15,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class TestSistemaPrestamo {
+public class SistemaPrestamoTest {
     @Mock
     private Catalogo catalogo;
 
@@ -32,7 +35,7 @@ public class TestSistemaPrestamo {
 
     @Test
     public void registrarPrestamoCorrecto() {
-        Libro libro = new Libro("123-456-797","Demian", "Herman Hesse", EstadoLibro.DISPONIBLE);
+        Libro libro = new Libro("123-456-797", "Demian", "Herman Hesse", EstadoLibro.DISPONIBLE);
         when(catalogo.buscarLibroPorISBN("123-456-797")).thenReturn(libro);
         Prestamo prestamo = sistemaPrestamo.registrarPrestamo("123-456-797");
         assertNotNull(prestamo);
@@ -41,16 +44,25 @@ public class TestSistemaPrestamo {
     }
 
     @Test
-    void testPrestarLibroNoDisponible() {
-        Libro libro = new Libro("789-456-123","La Casa de los Espiritus", "Isabel Allende", EstadoLibro.PRESTADO);
-        when(catalogo.buscarLibroPorISBN("789-456-123")).thenReturn(libro);
-        LibroNoDisponibleException thrown = assertThrows(
-                LibroNoDisponibleException.class,
-                () -> sistemaPrestamo.registrarPrestamo("789-456-123")
-        );
-        assertEquals("El libro no esta disponible en este momento", thrown.getMessage());
-        verify(catalogo, times(1)).buscarLibroPorISBN("789-456-123");
+    void testRegistrarPrestamoLibroNoEncontrado() {
+        Catalogo catalogoMock = mock(Catalogo.class);
+        when(catalogoMock.buscarLibroPorISBN("999")).thenReturn(null);
+        SistemaPrestamo sistema = new SistemaPrestamo(catalogoMock, new ArrayList<>());
+        Exception ex = assertThrows(LibroNoEncontradoException.class, () -> sistema.registrarPrestamo("999"));
+        assertEquals("El libro no fue encontrado", ex.getMessage());
     }
+
+    @Test
+    void testRegistrarPrestamoLibroNoDisponible() {
+        Catalogo catalogoMock = mock(Catalogo.class);
+        Libro libroMock = mock(Libro.class);
+        when(catalogoMock.buscarLibroPorISBN("123")).thenReturn(libroMock);
+        when(libroMock.getEstado()).thenReturn(EstadoLibro.PRESTADO);
+        SistemaPrestamo sistema = new SistemaPrestamo(catalogoMock, new ArrayList<>());
+        Exception ex = assertThrows(LibroNoDisponibleException.class, () -> sistema.registrarPrestamo("123"));
+        assertEquals("El libro no esta disponible en este momento", ex.getMessage());
+    }
+
 
     @Test
     void testPrestarLibroNoExiste() {
@@ -61,5 +73,42 @@ public class TestSistemaPrestamo {
         );
         assertEquals("El libro no fue encontrado", thrown.getMessage());
         verify(catalogo, times(1)).buscarLibroPorISBN("123");
+    }
+
+    @Test
+    void testBuscarPrestamoPorISBNExiste() {
+        Libro libroMock = mock(Libro.class);
+        when(libroMock.getISBN()).thenReturn("321");
+        Prestamo prestamoMock = mock(Prestamo.class);
+        when(prestamoMock.getLibro()).thenReturn(libroMock);
+        List<Prestamo> lista = List.of(prestamoMock);
+        SistemaPrestamo sistema = new SistemaPrestamo(null, lista);
+        Prestamo resultado = sistema.buscarPrestamoPorISBN("321");
+        assertNotNull(resultado);
+        assertEquals(prestamoMock, resultado);
+    }
+
+    @Test
+    void testBuscarPrestamoPorISBNNoExiste() {
+        Libro libroMock = mock(Libro.class);
+        when(libroMock.getISBN()).thenReturn("000");
+        Prestamo prestamoMock = mock(Prestamo.class);
+        when(prestamoMock.getLibro()).thenReturn(libroMock);
+        List<Prestamo> lista = List.of(prestamoMock);
+        SistemaPrestamo sistema = new SistemaPrestamo(null, lista);
+        Prestamo resultado = sistema.buscarPrestamoPorISBN("999");
+        assertNull(resultado);
+    }
+
+    @Test
+    void testGetPrestamosRetornaCopia() {
+        Prestamo prestamoMock = mock(Prestamo.class);
+        List<Prestamo> lista = new ArrayList<>();
+        lista.add(prestamoMock);
+        SistemaPrestamo sistema = new SistemaPrestamo(null, lista);
+        List<Prestamo> copia1 = sistema.getPrestamos();
+        List<Prestamo> copia2 = sistema.getPrestamos();
+        assertEquals(copia1, copia2);
+        assertNotSame(copia1, copia2);
     }
 }

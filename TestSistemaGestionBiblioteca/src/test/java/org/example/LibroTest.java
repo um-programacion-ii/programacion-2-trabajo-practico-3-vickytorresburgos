@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class TestLibro {
+public class LibroTest {
     @Test
     void testCrearLibroValido() {
         Libro libro = new Libro("123-456-789", "La Metamorfosis", "Franz Kafka", EstadoLibro.DISPONIBLE);
